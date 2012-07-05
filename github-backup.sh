@@ -33,7 +33,7 @@ fi
 cd "$dest" || exit 3
 
 # get the repos
-repos=$(curl -s "$api/users/$user/repos")
+repos=$(curl -sS "$api/users/$user/repos")
 
 # Check for error
 if [[ -z "$repos" || -n "$(json message <<< "$repos")" ]]; then
