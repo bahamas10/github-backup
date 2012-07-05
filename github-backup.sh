@@ -44,7 +44,7 @@ fi
 
 # loop and update
 while read git_url; do
-	# Attempt to clone, this might fail if the repo exists
+	# Attempt to clone, this will fail if the repo exists
 	git clone "$git_url"
 	# basename and extension removal for directory name
 	tmp=${git_url##*/}; dir=${tmp%.git}
