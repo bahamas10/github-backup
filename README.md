@@ -24,6 +24,11 @@ The GitHub api is easily consumed as json, so [jsontool](https://github.com/tren
 is needed for this script to work.  The script will prompt you with installation
 instructions if jsontool is not found.
 
+Known Issues
+------------
+
+GitHub paginates the API to 30... this script doesn't account for that.
+
 License
 -------
 
