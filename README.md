@@ -3,6 +3,8 @@ github-backup
 
 Backup (clone and update) all public repositories of a GitHub user
 
+**Now supports pagination!**
+
 Usage
 -----
 
@@ -23,11 +25,6 @@ Dependencies
 The GitHub api is easily consumed as json, so [jsontool](https://github.com/trentm/json)
 is needed for this script to work.  The script will prompt you with installation
 instructions if jsontool is not found.
-
-Known Issues
-------------
-
-GitHub paginates the API to 30... this script doesn't account for that.
 
 License
 -------

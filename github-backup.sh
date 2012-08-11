@@ -8,6 +8,7 @@ api='https://api.github.com'
 
 user=$1
 dest=${2:-$PWD}
+per_page=100
 
 usage() {
 	cat <<-EOF
@@ -32,18 +33,36 @@ fi
 # chdir
 cd "$dest" || exit 3
 
-# get the repos
-repos=$(curl -sS "$api/users/$user/repos?per_page=100")
+# Handle Pagination
+repos=''
+i=1
+while true; do
+	# get the repos
+	_repos=$(curl -sS "$api/users/$user/repos?per_page=$per_page&page=$i")
+	echo "$api/users/$user/repos?per_page=$per_page&page=$i"
 
-# Check for error
-if [[ -z "$repos" || -n "$(json message <<< "$repos")" ]]; then
-	echo "Error pulling repo!" >&2
-	echo "$repos" >&2
-	exit 4
-fi
+	# Check for error
+	if [[ -z "$_repos" || -n "$(json message <<< "$_repos")" ]]; then
+		echo "Error pulling repo!" >&2
+		echo "$_repos" >&2
+		exit 4
+	fi
+
+	# get the field we care about
+	_repos=$(json -a git_url <<< "$_repos")
+
+	# Append the fields
+	repos=$repos$_repos$'\n'
+
+	# Check to see if we hit the end
+	(( $(wc -l <<< "$_repos") < per_page)) && break
+
+	((i++))
+done
 
 # loop and update
 while read git_url; do
+	[[ -z "$git_url" ]] && continue
 	# Attempt to clone, this will fail if the repo exists
 	git clone "$git_url"
 	# basename and extension removal for directory name
@@ -56,4 +75,4 @@ while read git_url; do
 		# Back out of the dir
 		cd ..
 	fi
-done < <(json -a git_url <<< "$repos")
+done <<< "$repos"
