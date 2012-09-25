@@ -39,7 +39,6 @@ i=1
 while true; do
 	# get the repos
 	_repos=$(curl -sS "$api/users/$user/repos?per_page=$per_page&page=$i")
-	echo "$api/users/$user/repos?per_page=$per_page&page=$i"
 
 	# Check for error
 	if [[ -z "$_repos" || -n "$(json message <<< "$_repos")" ]]; then
