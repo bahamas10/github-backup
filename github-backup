@@ -19,7 +19,7 @@ usage() {
 }
 
 # Check for user
-if [[ -z "$user" ]]; then
+if [[ -z $user ]]; then
 	usage >&2
 	exit 1
 fi
@@ -41,8 +41,8 @@ while true; do
 	_repos=$(curl -sS "$api/users/$user/repos?per_page=$per_page&page=$i")
 
 	# Check for error
-	if [[ -z "$_repos" || -n "$(json message <<< "$_repos")" ]]; then
-		echo "Error pulling repo!" >&2
+	if [[ -z $_repos || -n "$(json message <<< "$_repos")" ]]; then
+		echo 'Error pulling repo!' >&2
 		echo "$_repos" >&2
 		exit 4
 	fi
@@ -60,18 +60,52 @@ while true; do
 done
 
 # loop and update
+errors=()
 while read git_url; do
-	[[ -z "$git_url" ]] && continue
+	[[ -z $git_url ]] && continue
+
+	echo "-> $git_url"
+
 	# Attempt to clone, this will fail if the repo exists
 	git clone "$git_url"
+
 	# basename and extension removal for directory name
-	tmp=${git_url##*/}; dir=${tmp%.git}
-	# Try to cd into the dir
-	if cd "$dir"; then
-		# Reset any changes and pull everything
-		git reset --hard HEAD &&
-		git pull --all
-		# Back out of the dir
-		cd ..
+	tmp=${git_url##*/}
+	dir=${tmp%.git}
+
+	# clone and update in a subshell
+	(
+		# any error is a failure here
+		set -e
+		cd "$dir"
+
+		# pull changes
+		git fetch origin
+
+		# check if repo is empty on the remote end.  this is kinda
+		# lame, but `git rev-parse --is-bare-repository` didn't work
+		# for empty repos on github.
+		if [[ ! -d .git/refs/remotes ]]; then
+			echo 'repository is empty' >&2
+			exit 0
+		fi
+
+		# reset to upstream
+		git reset --hard '@{upstream}'
+		git clean -fd
+	)
+	code=$?
+
+	if ((code != 0)); then
+		errors+=("$git_url")
 	fi
+
+	echo
 done <<< "$repos"
+
+# print errors at end if there were any
+if [[ -n ${errors[0]} ]]; then
+	echo "=== ${#errors[@]} errors encountered" >&2
+	printf -- "- %s\n" "${errors[@]}" >&2
+	exit 1
+fi

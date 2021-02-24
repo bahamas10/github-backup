@@ -11,13 +11,13 @@ Usage
 Run the script with a user as the first argument, and optionally
 the destination directory as the second argument (defaults to `$PWD`).
 
-    ./github-backup.sh <user> [dest dir]
+    ./github-backup <user> [dest dir]
 
 Example
 -------
 
     mkdir backupdir
-    ./github-backup.sh bahamas10 backupdir
+    ./github-backup bahamas10 backupdir
 
 Dependencies
 ------------
