@@ -22,9 +22,7 @@ Example
 Dependencies
 ------------
 
-The GitHub api is easily consumed as json, so [jsontool](https://github.com/trentm/json)
-is needed for this script to work.  The script will prompt you with installation
-instructions if jsontool is not found.
+- `jq`
 
 License
 -------
